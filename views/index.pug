@@ -1,0 +1,36 @@
+html
+html
+    head
+        style(type='text/css').
+           body {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            form {
+                margin: 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                -ms-transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%);
+                text-align: center;
+            }
+
+            form input {
+                font-size: 34px;
+                border-radius: 10px;
+            }
+
+            form button {
+                font-size: 24px;
+                border-radius: 10px;
+            }
+        title URL-shortener
+    body
+        form(action = "/", method = "POST")
+            div
+                input(name = "url" placeholder="Insert URL")
+            br
+            button(type = "submit") Submit
