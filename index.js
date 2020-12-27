@@ -27,12 +27,12 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', async (req, res) => {
-    if (!await helper.validate(req.body)) {
+    const url = await helper.validate(req.body);
+
+    if (url === null) {
         res.status(400).json({ message: "Please provide a valid url" });
         return;
     }
-
-    let { url } = req.body;
 
     let doc = await collection.findOne({ url: url }).catch((err) => {
         res.sendStatus(500);
@@ -46,7 +46,7 @@ app.post('/', async (req, res) => {
 
     let slug = nanoid.nanoid(5);
 
-    collection.insert({ slug: slug, url: url });
+    collection.insert({ slug: slug, url: url, creationDate: Date.now() });
     res.json({ message: `127.0.0.1/u/${slug}` });
 });
 

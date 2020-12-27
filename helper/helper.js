@@ -26,21 +26,23 @@ function GetHttps(url) {
 module.exports.validate = async function (document) {
     try {
         const value = await schema.validateAsync(document);
-        const url = Url.parse(value.url);
+        const urlObj = Url.parse(value.url, true);
         let statusCode = 400;
+        let url = value.url;
 
-        if (url.protocol === 'https:') {
+        if (urlObj.protocol === 'https:') {
             statusCode = await GetHttps(value.url);
-        } else if (url.protocol === 'http:') {
+        } else if (urlObj.protocol === 'http:') {
             statusCode = await GetHttp(value.url);
         } else {
-            return false;
+            url = `https://${urlObj.href}`;
+            statusCode = await GetHttps(url);
         }
 
-        if (statusCode === 200 || statusCode === 301) return true;
-        return false;
+        if (statusCode === 404) return null;
+        return url;
     } catch (error) {
         console.error(error);
-        return false;
+        return null;
     }
 };
