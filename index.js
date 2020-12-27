@@ -2,10 +2,10 @@ const express = require('express');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const nanoid = require('nanoid');
-const path = require('path');
 const pug = require('pug');
 const bodyParser = require('body-parser');
 const config = require('./config');
+const helper = require('./helper/helper.js');
 
 // setup db
 const mongo_uri = process.env.MONGO_URI;
@@ -16,31 +16,54 @@ const collection = db.get('main');
 const app = express();
 app.use(morgan('tiny'));
 app.use(helmet());
+app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'pug');
-app.set('views', './views');
 const port = config.port || 8080;
 
 app.get('/', (req, res) => {
     res.render('index.pug');
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
+    if (!await helper.validate(req.body)) {
+        res.status(400).json({ message: "Please provide a valid url" });
+        return;
+    }
+
     let { url } = req.body;
+
+    let doc = await collection.findOne({ url: url }).catch((err) => {
+        res.sendStatus(500);
+        return;
+    });
+
+    if (doc !== null) {
+        res.json({ message: `127.0.0.1/u/${doc.slug}` });
+        return;
+    }
+
     let slug = nanoid.nanoid(5);
 
     collection.insert({ slug: slug, url: url });
-    res.send(`127.0.0.1/${slug}`);
+    res.json({ message: `127.0.0.1/u/${slug}` });
 });
 
-app.get('/:slug', (req, res) => {
+app.get('/u/:slug', async (req, res) => {
     let { slug } = req.params;
-    collection.findOne({ slug: slug }).then((doc) => {
-        res.redirect(doc.url);
-    }).catch((err) => {
-        res.sendStatus(404);
+
+    let doc = await collection.findOne({ slug: slug }).catch((err) => {
+        res.sendStatus(500);
+        return;
     });
+
+    if (doc === null || doc.url === null) {
+        res.sendStatus(404);
+        return;
+    }
+
+    res.redirect(doc.url);
 });
 
 app.listen(port, () => {
