@@ -2,13 +2,13 @@ html
 html
     head
         link(rel="stylesheet", href="styles/style.css")
-        script(src="scripts/ajax.js")
+        script(src="scripts/client.js")
         title URL-Shortener
     body
         form(action = "/", method = "POST" id = "formId")
             div
-                label(for="urlInputLabel" id="urlLabel") URL-Shortener
+                label(for="urlInputLabel" id="labelId") URL-Shortener
             br
             div
-                input(name = "url" id="urlInput" placeholder="Insert URL")
-                button(type = "submit" id = "btn") Submit
+                input(name = "url" id="inputId" placeholder="Insert URL")
+                button(type = "submit" id = "btnId") Submit
